@@ -197,7 +197,7 @@ module ActiveModel
 
       attributes += options[:required_fields] if options[:required_fields]
 
-      attributes.each_with_object({}) do |name, hash|
+      filtered(attributes).each_with_object({}) do |name, hash|
         unless self.class._fragmented
           hash[name] = send(name)
         else
@@ -207,7 +207,7 @@ module ActiveModel
     end
 
     def each_association(&block)
-      self.class._associations.dup.each do |name, association_options|
+      filtered(self.class._associations.dup).each do |name, association_options|
         next unless object
         association_value = send(name)
 
@@ -252,6 +252,18 @@ module ActiveModel
           serializer_class
         elsif klass.superclass
           get_serializer_for(klass.superclass)
+        end
+      end
+    end
+
+    def filtered(names)
+      names.select do |name|
+        method = "include_#{name}?".to_sym
+
+        if respond_to?(method)
+          public_send(method)
+        else
+          true
         end
       end
     end

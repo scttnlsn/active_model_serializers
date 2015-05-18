@@ -49,6 +49,17 @@ module ActiveModel
         assert_equal({id: 1, body: "ZOMG!!", date: "2015", likes: nil},
                      serializer.attributes)
       end
+
+      def test_attributes_inclusion
+        serializer_klass = Class.new(CommentSerializer) do
+          def include_body?
+            false
+          end
+        end
+        serializer = serializer_klass.new(@comment)
+
+        assert_equal({id: 1}, serializer.attributes)
+      end
     end
   end
 end

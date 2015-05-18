@@ -122,6 +122,21 @@ module ActiveModel
         )
         assert_equal(inherited_klass._associations, expected_associations)
       end
+
+      def test_associations_inclusion
+        serializer_klass = Class.new(PostSerializer) do
+          def include_comments?
+            false
+          end
+        end
+        serializer = serializer_klass.new(@post)
+
+        serializer.each_association do |name, serializer, options|
+          if name == :comments
+            flunk 'Associations should not include comments'
+          end
+        end
+      end
     end
   end
 end
